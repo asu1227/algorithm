@@ -9,37 +9,32 @@ public class KMP {
         }
         // KMP数组，回退数组
         int[] pi = new int[m];
-        Arrays.fill(pi, -1);
-        for (int i = 1; i < m; i++) {
-            int j = pi[i-1];
-            while (j != -1 && word.charAt(i) != word.charAt(j+1)) {
+        for (int i = 1, j = 0; i < m; i++) {
+            while (j > 0 && word.charAt(j) != word.charAt(i)) {
                 // 回退
-                j = pi[j];
+                j = pi[j-1];
             }
-            if (word.charAt(i) == word.charAt(j+1)) {
-                // 更新KMP数组，即最大前缀后缀和数组
-                // s[i+1] == s[pi[i]]，则更新pi[i+1] = pi[i]+1;
-                // s[i+1] == s[j], 则更新pi[i+1] = j+1
-                pi[i] = j+1;
+            if (word.charAt(j) == word.charAt(i)) {
+                j++;
             }
+            pi[i] = j;
         }
         // 动态规划
-        // k[i]表示以i为末尾的字符串中含有连续子字符串的数量
-        int[] k = new int[n];
-        int j = -1;
-        for (int i = 0; i < n; i++) {
-            while (j != -1 && sequence.charAt(i) != word.charAt(j+1)) {
-                j = pi[j];
+        // f[i]表示以i为末尾的字符串中含有连续子字符串的数量
+        int[] f = new int[n];
+        for (int i = 0, j = 0; i < n; i++) {
+            while (j > 0 && word.charAt(j) != sequence.charAt(i)) {
+                j = pi[j-1];
             }
             if (sequence.charAt(i) == word.charAt(j+1)) {
                 j++;
-                if (j == m - 1) {
-                    k[i] = (i == m - 1 ? 0 : k[i-m]) + 1;
-                    // 找到后还应该回退一次
-                    j = pi[j];
+                if (j == m) {
+                    f[i] = (i >= m ? f[i-m] : 0) + 1;
+                    // 完整匹配后回退
+                    j = pi[j-1];
                 }
             }
         }
-        return Arrays.stream(k).max().getAsInt();
+        return Arrays.stream(f).max().getAsInt();
     }
 }
